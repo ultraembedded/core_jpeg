@@ -35,59 +35,68 @@ public:
     int process(uint8_t *data, int len)
     {
         uint8_t *buf = data;
+        int consumed = 0;
 
-        // Huffman table info, first four MSBs represent table type (0 for DC, 1 for AC), last four LSBs represent table #
-        uint8_t  table_info  = *buf++;
-        int table_idx = 0;
-        switch (table_info)
+        // DHT tables can be combined into one section (it seems)
+        while (consumed <= (len-17))
         {
-            case DHT_TABLE_Y_DC:
-                table_idx = DHT_TABLE_Y_DC_IDX;
-                break;
-            case DHT_TABLE_Y_AC:
-                table_idx = DHT_TABLE_Y_AC_IDX;
-                break;
-            case DHT_TABLE_CX_DC:
-                table_idx = DHT_TABLE_CX_DC_IDX;
-                break;
-            case DHT_TABLE_CX_AC:
-                table_idx = DHT_TABLE_CX_AC_IDX;
-                break;
-            default:
-                assert(!"ERROR: Bad JPEG");
-                break;
-        }
-        dprintf("DHT (Table idx %d)\n", table_idx);
+            // Huffman table info, first four MSBs represent table type (0 for DC, 1 for AC), last four LSBs represent table #
+            uint8_t  table_info  = *buf++;
 
-        // Reset table
-        memset(&m_dht_table[table_idx], 0, sizeof(m_dht_table[0]));
-
-        // Extract symbol count
-        uint8_t symb_count[16];
-        for (int x=0;x<16;x++)
-        {
-            symb_count[x] = *buf++;
-            dprintf(" bit length: %d, symbols: %d\n", x, symb_count[x]);
-        }
-
-        // Extract table values
-        // Build the Huffman map of (length, code) -> value
-        uint16_t code = 0;
-        int entry = 0;
-        for (int x=0;x<16;x++)
-        {
-            for (int j=0;j<symb_count[x];j++)
+            int table_idx = 0;
+            switch (table_info)
             {
-                uint8_t dht_val = *buf++;
-                m_dht_table[table_idx].code[entry]     = code;
-                m_dht_table[table_idx].code_len[entry] = x+1;
-                m_dht_table[table_idx].value[entry++]  = dht_val;
-
-                code++;
+                case DHT_TABLE_Y_DC:
+                    table_idx = DHT_TABLE_Y_DC_IDX;
+                    break;
+                case DHT_TABLE_Y_AC:
+                    table_idx = DHT_TABLE_Y_AC_IDX;
+                    break;
+                case DHT_TABLE_CX_DC:
+                    table_idx = DHT_TABLE_CX_DC_IDX;
+                    break;
+                case DHT_TABLE_CX_AC:
+                    table_idx = DHT_TABLE_CX_AC_IDX;
+                    break;
+                default:
+                    assert(!"ERROR: Bad JPEG");
+                    break;
             }
-            code <<= 1;
+            dprintf("DHT (Table idx %d)\n", table_idx);
+
+            // Reset table
+            memset(&m_dht_table[table_idx], 0, sizeof(m_dht_table[0]));
+
+            // Extract symbol count
+            uint8_t symb_count[16];
+            for (int x=0;x<16;x++)
+            {
+                symb_count[x] = *buf++;
+                dprintf(" bit length: %d, symbols: %d\n", x, symb_count[x]);
+            }
+
+            // Extract table values
+            // Build the Huffman map of (length, code) -> value
+            uint16_t code = 0;
+            int entry = 0;
+            for (int x=0;x<16;x++)
+            {
+                for (int j=0;j<symb_count[x];j++)
+                {
+                    uint8_t dht_val = *buf++;
+                    m_dht_table[table_idx].code[entry]     = code;
+                    m_dht_table[table_idx].code_len[entry] = x+1;
+                    m_dht_table[table_idx].value[entry++]  = dht_val;
+                    dprintf(" %d: %x -> %x\n", entry, code, dht_val);
+
+                    code++;
+                }
+                code <<= 1;
+            }
+            m_dht_table[table_idx].entries = entry;
+
+            consumed = buf - data;
         }
-        m_dht_table[table_idx].entries = entry;
 
         return buf - data;
     }

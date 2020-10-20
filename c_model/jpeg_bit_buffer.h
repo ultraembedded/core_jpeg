@@ -90,7 +90,7 @@ public:
 
     bool eof(void)
     {
-        return ((m_rd_offset / 8) >= m_wr_offset);
+        return (((m_rd_offset+7) / 8) >= m_wr_offset);
     }
 
 private:
