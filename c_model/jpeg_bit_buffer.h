@@ -9,6 +9,14 @@
 
 #define dprintf
 
+#ifndef TEST_HOOKS_BITBUFFER
+#define TEST_HOOKS_BITBUFFER(x)
+#endif
+
+#ifndef TEST_HOOKS_BITBUFFER_DECL
+#define TEST_HOOKS_BITBUFFER_DECL
+#endif
+
 //-----------------------------------------------------------------------------
 // jpeg_bit_buffer:
 //-----------------------------------------------------------------------------
@@ -67,24 +75,27 @@ public:
         return true;
     }
 
-    // Read upto 16-bit (aligned to MSB)
-    uint16_t read_word(void)
+    // Read upto 32-bit (aligned to MSB)
+    uint32_t read_word(void)
     {
         if (eof())
             return 0;
 
-        int byte = m_rd_offset / 8;
-        int bit  = m_rd_offset % 8; // 0 - 7
-        dprintf("byte: %d bit %d : %02x\n\n", byte, bit, m_buffer[byte]);
-        uint32_t w = (m_buffer[byte] << 24) | (m_buffer[byte+1] << 16) | (m_buffer[byte+2] << 8) | (m_buffer[byte+3] << 0);
-
-        dprintf("BIT: %08x offset %d\n", w, m_rd_offset);
+        int byte   = m_rd_offset / 8;
+        int bit    = m_rd_offset % 8; // 0 - 7
+        uint64_t w = 0;
+        for (int x=0;x<5;x++)
+        {
+            w |= m_buffer[byte+x];
+            w <<= 8;
+        }
         w <<= bit;
-        return (w >> 16);
+        return w >> 16;
     }
 
     void advance(int bits)
     {
+        TEST_HOOKS_BITBUFFER(bits);
         m_rd_offset += bits;
     }
 
@@ -92,6 +103,8 @@ public:
     {
         return (((m_rd_offset+7) / 8) >= m_wr_offset);
     }
+
+    TEST_HOOKS_BITBUFFER_DECL;
 
 private:
     uint8_t *m_buffer;
