@@ -25,7 +25,7 @@ This project is a JPEG decoder core for FPGA written in Verilog.
 4. Map to FPGA resources such as BlockRAM, DSP macros wherever possible.
 
 ## FPGA Mapping
-The current version of the JPEG decoder uses the following resources on a Xilinx 7 series FPGA (post-implementation);
+The current version of the JPEG decoder uses the following resources on a Xilinx 7 series FPGA (post-implementation);  
 ![Resource Usage](docs/resources.png)
 
 The design is also able to meet timing >= 75MHz.
