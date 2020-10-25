@@ -24,6 +24,12 @@ This project is a JPEG decoder core for FPGA written in Verilog.
 3. Be well tested (with verification against a reference C-model).
 4. Map to FPGA resources such as BlockRAM, DSP macros wherever possible.
 
+## FPGA Mapping
+The current version of the JPEG decoder uses the following resources on a Xilinx 7 series FPGA (post-implementation);
+![Resource Usage](docs/resources.png)
+
+The design is also able to meet timing >= 75MHz.
+
 ## Performance
 Peak JPEG decode performance is as follows;
 * Monochrome  = 66 cycles per 8x8 pixels  (1.0 cycles per pixel)
@@ -38,3 +44,18 @@ Video playback usually requires at least 25 frames per second, hence there is a 
 This fact drives the design choices taken for this implementation.
 
 Clearly, the higher the resolution, the more pixels that must be produced from the JPEG decoder within that 40ms budget, so this core is designed to have high throughput in the output stages - with additional resources dedicated to the IDCT transform, and output re-ordering stages to facilitate this.
+
+## Limitations
+The current release does not support;
+* Optimised Huffman tables (that is to say that the 'std' Huffman tables are hardcoded in the design and ignored in the JPEG file).
+* Restart markers
+* 4:2:2 H/V chroma subsampling (only 4:4:4 and 4:2:0 are supported).
+
+Under the GNU Image Manipulation Program, the following 'X' options are **not** supported currently;
+![Unsupported Opts](docs/supported_opts.png)
+
+## Future Work / TODO
+* Add support for dynamic Huffman tables.
+* Add support for the first layer of progressive JPEG images.
+* Add option to reduce arithmetic precision to reduce design size.
+* Add lightweight variant of the core with reduced performance (for smaller FPGAs).
