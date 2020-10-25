@@ -4,6 +4,33 @@ Github: [https://github.com/ultraembedded/core_jpeg](https://github.com/ultraemb
 
 This project is a JPEG decoder core for FPGA written in Verilog.
 
+![JPEG Core](docs/block_diagram.png)
+
+## Features
+* Baseline JPEG Decoder IP (sequential encoded images).
+* 32-bit AXI Stream input.
+* Input format: JPEG (JPEG File Interchange Format)
+* Output format: 24-bit RGB output in 8x8 blocks (row-major ordering).
+* Support for Monochrome, 4:4:4, 4:2:0 chroma subsampling support.
+* Fixed standard Huffman tables (dynamic table support planned).
+* Dynamic DQT tables from JPEG input stream.
+* Synthesizable Verilog 2001, Verilator and FPGA friendly.
+* Multipliers and tables / FIFO's map efficiently to FPGA resources (DSP48, blockRAM, etc).
+* Verified using co-simulation against a C-model and tested on FPGA with thousands of images.
+
+## Design Aims
+1. Fast decode performance suitable for video playback
+2. Support a minimal JPEG baseline feature set.
+3. Be well tested (with verification against a reference C-model).
+4. Map to FPGA resources such as BlockRAM, DSP macros wherever possible.
+
+## Performance
+Peak JPEG decode performance is as follows;
+* Monochrome  = 66 cycles per 8x8 pixels  (1.0 cycles per pixel)
+* YCbCr 4:2:0 = 137 cycles per 8x8 pixels (2.1 cycles per pixel)
+* YCbCr 4:4:4 = 198 cycles per 8x8 pixels (3.1 cycles per pixel)
+
+## Use Case
 The purpose of this design was to replace a 3rd party JPEG decoder core used in my [Motion JPEG](https://en.wikipedia.org/wiki/Motion_JPEG) based [FPGA video player](https://github.com/ultraembedded/FPGAmp).  
 Motion JPEG has worse compression performance than MPEG based video, but the complexity of the HW required is low enough that it can be used on low(-ish)-end FPGAs.
 
@@ -11,12 +38,3 @@ Video playback usually requires at least 25 frames per second, hence there is a 
 This fact drives the design choices taken for this implementation.
 
 Clearly, the higher the resolution, the more pixels that must be produced from the JPEG decoder within that 40ms budget, so this core is designed to have high throughput in the output stages - with additional resources dedicated to the IDCT transform, and output re-ordering stages to facilitate this.
-
-## Aims
-1. Fast decode performance suitable for video playback
-2. Support a minimal JPEG baseline feature set.
-3. Be well tested (with verification against a reference C-model).
-4. Map to FPGA resources such as BlockRAM, DSP macros wherever possible.
-
-
-more to come ...
