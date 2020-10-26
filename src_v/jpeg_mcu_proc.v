@@ -431,6 +431,22 @@ begin
     get_bitbuffer_pop = inport_pop_o;
 end
 endfunction
+
+function get_dht_valid; /*verilator public*/
+begin
+    get_dht_valid = lookup_valid_i && (state_q == STATE_HUFF_LOOKUP);
+end
+endfunction
+function [4:0] get_dht_width; /*verilator public*/
+begin
+    get_dht_width = lookup_width_i;
+end
+endfunction
+function [7:0] get_dht_value; /*verilator public*/
+begin
+    get_dht_value = lookup_value_i;
+end
+endfunction
 `endif
 
 

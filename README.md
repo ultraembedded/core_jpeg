@@ -12,7 +12,8 @@ This project is a JPEG decoder core for FPGA written in Verilog.
 * Input format: JPEG (JPEG File Interchange Format)
 * Output format: 24-bit RGB output in 8x8 blocks (row-major ordering).
 * Support for Monochrome, 4:4:4, 4:2:0 chroma subsampling support.
-* Fixed standard Huffman tables (dynamic table support planned).
+* Support for fixed standard Huffman tables (reduced logic usage, fast).
+* Support for dynamic Huffman tables (from JPEG input stream -> slower decode, more logic).
 * Dynamic DQT tables from JPEG input stream.
 * Synthesizable Verilog 2001, Verilator and FPGA friendly.
 * Multipliers and tables / FIFO's map efficiently to FPGA resources (DSP48, blockRAM, etc).
@@ -47,15 +48,16 @@ Clearly, the higher the resolution, the more pixels that must be produced from t
 
 ## Limitations
 The current release does not support;
-* Optimised Huffman tables (that is to say that the 'std' Huffman tables are hardcoded in the design and ignored in the JPEG file).
 * Restart markers
 * 4:2:2 H/V chroma subsampling (only 4:4:4 and 4:2:0 are supported).
 
 Under the GNU Image Manipulation Program, the following 'X' options are **not** supported currently;
 ![Unsupported Opts](docs/supported_opts.png)
 
+Note: Support for 'optimised' Huffman tables is possible when design parameter SUPPORT_WRITABLE_DHT=1.  
+This functionality increases the core size substantially and reduces performance.
+
 ## Future Work / TODO
-* Add support for dynamic Huffman tables.
 * Add support for the first layer of progressive JPEG images.
 * Add option to reduce arithmetic precision to reduce design size.
 * Add lightweight variant of the core with reduced performance (for smaller FPGAs).
