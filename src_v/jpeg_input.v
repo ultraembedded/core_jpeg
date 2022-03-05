@@ -313,7 +313,7 @@ else if (state_q == STATE_UXP_LENH || state_q == STATE_DQT_LENH ||
 else if (state_q == STATE_UXP_LENL || state_q == STATE_DQT_LENL ||
          state_q == STATE_DHT_LENL || state_q == STATE_IMG_LENL ||
          state_q == STATE_SOF_LENL)
-    length_q <= {8'b0, data_r} - 16'd2;
+    length_q <= {length_q[15:8], data_r} - 16'd2;
 else if ((state_q == STATE_UXP_DATA || 
           state_q == STATE_DQT_DATA ||
           state_q == STATE_DHT_DATA ||
